@@ -18,10 +18,10 @@ class Am {
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_files' ) );
 
-		add_action( 'wp_ajax_call', array( $this, 'get_cached_results' ) );
-		add_action( 'wp_ajax_nopriv_call', array( $this, 'get_cached_results' ) );
+		add_action( 'wp_ajax_get_cached_results', array( $this, 'get_cached_results' ) );
+		add_action( 'wp_ajax_nopriv_get_cached_results', array( $this, 'get_cached_results' ) );
 
-		add_action( 'pre_get_posts', array( $this, 'get_cached_results' ) );
+		add_shortcode( 'show_table', array( $this, 'register_show_table' ) );
 	}
 
 	/**
@@ -59,7 +59,6 @@ class Am {
 			$response = $this->api_call();
 			set_transient( 'api_ress', $response, DAY_IN_SECONDS );
 		}
-
 		return $response;
 	}
 
@@ -107,6 +106,39 @@ class Am {
 		} else {
 			return $response;
 		}
+	}
+
+	/**
+	 * Register shortcode to show API Results
+	 *
+	 * @return $output
+	 * @author Fahad Sheikh
+	 **/
+	public function register_show_table( $shortcode_attributes ) {
+
+		$data = json_decode( $this->get_cached_results() );
+
+		ob_start(); ?>
+		<table>
+			<caption><?php echo esc_attr( $data->title ); ?></caption>
+			<tr>
+				<?php foreach ( $data->data->headers as $key => $value ) : ?>
+					<th><?php echo esc_attr( $value ); ?></th>
+				<?php endforeach; ?>
+			</tr>
+			<?php foreach ( $data->data->rows as $key => $table_columns ) : ?>
+				<tr>
+					<?php foreach ( $table_columns as $table_column ) : ?>
+						<td>
+							<?php echo esc_textarea( $table_column ); ?>
+						</td>
+					<?php endforeach; ?>
+				</tr>
+			<?php endforeach; ?>
+		</table>
+
+		<?php
+		return ob_get_clean();
 	}
 }
 

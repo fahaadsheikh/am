@@ -6,7 +6,7 @@ jQuery( document ).ready(function($) {
 		 dataType : "json",
 		 url : jsobject.ajaxurl,
 		 data : {
-		 	action: "call" 
+		 	action: "get_cached_results" 
 		 },
 		 success: function(response) {
 		 	console.log(response);

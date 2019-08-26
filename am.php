@@ -18,8 +18,8 @@ class Am {
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_files' ) );
 
-		add_action( 'wp_ajax_get_cached_results', array( $this, 'get_cached_results' ) );
-		add_action( 'wp_ajax_nopriv_get_cached_results', array( $this, 'get_cached_results' ) );
+		add_action( 'wp_ajax_return_response', array( $this, 'return_response' ) );
+		add_action( 'wp_ajax_nopriv_return_response', array( $this, 'return_response' ) );
 
 		add_shortcode( 'show_table', array( $this, 'register_show_table' ) );
 	}
@@ -52,7 +52,7 @@ class Am {
 	 * @return response
 	 * @author Fahad Sheikh
 	 **/
-	public function get_cached_results() {
+	public function cached_results() {
 		$response = get_transient( 'api_ress' );
 
 		if ( false === $response ) {
@@ -60,6 +60,22 @@ class Am {
 			set_transient( 'api_ress', $response, DAY_IN_SECONDS );
 		}
 		return $response;
+	}
+
+	/**
+	 * Return API Response to AJAX
+	 *
+	 * @return void
+	 * @author Fahad Sheikh
+	 **/
+	public function return_response() {
+		$response = $this->cached_results();
+
+		if ( ! isset( $response ) ) :
+			wp_send_json_error( array( 'error' => __( 'Data could not be fetched.' ) ) );
+		else :
+				wp_send_json_success( $response );
+		endif;
 	}
 
 	/**
@@ -116,37 +132,8 @@ class Am {
 	 **/
 	public function register_show_table( $shortcode_attributes ) {
 
-		$data = json_decode( $this->get_cached_results() );
-
 		ob_start(); ?>
-		<table>
-			<caption><?php echo esc_attr( $data->title ); ?></caption>
-			<tr>
-				<?php foreach ( $data->data->headers as $key => $value ) : ?>
-					<th><?php echo esc_attr( $value ); ?></th>
-				<?php endforeach; ?>
-			</tr>
-			<?php foreach ( $data->data->rows as $key => $table_columns ) : ?>
-				<tr>
-					<?php foreach ( $table_columns as $type => $table_column ) : ?>
-						<td>
-						<?php
-						switch ( $type ) {
-							case 'email':
-								echo esc_html( sanitize_email( $table_column ) );
-								break;
-							case 'date':
-								echo esc_html( date( 'm/d/Y H:i:s', $table_column ) );
-								break;
-							default:
-								echo esc_textarea( $table_column );
-								break;
-						}
-						?>
-						</td>
-					<?php endforeach; ?>
-				</tr>
-			<?php endforeach; ?>
+		<table class="jspopulate">
 		</table>
 
 		<?php

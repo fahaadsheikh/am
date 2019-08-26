@@ -128,9 +128,21 @@ class Am {
 			</tr>
 			<?php foreach ( $data->data->rows as $key => $table_columns ) : ?>
 				<tr>
-					<?php foreach ( $table_columns as $table_column ) : ?>
+					<?php foreach ( $table_columns as $type => $table_column ) : ?>
 						<td>
-							<?php echo esc_textarea( $table_column ); ?>
+						<?php
+						switch ( $type ) {
+							case 'email':
+								echo esc_html( sanitize_email( $table_column ) );
+								break;
+							case 'date':
+								echo esc_html( date( 'm/d/Y H:i:s', $table_column ) );
+								break;
+							default:
+								echo esc_textarea( $table_column );
+								break;
+						}
+						?>
 						</td>
 					<?php endforeach; ?>
 				</tr>

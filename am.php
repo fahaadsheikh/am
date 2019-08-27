@@ -27,7 +27,6 @@ class Am {
 		add_action( 'wp_ajax_nopriv_return_response', array( $this, 'return_response' ) );
 
 		add_shortcode( 'show_table', array( $this, 'register_show_table' ) );
-		add_action( 'init', array($this, 'cached_results') );
 	}
 
 	/**

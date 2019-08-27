@@ -1,7 +1,19 @@
 <?php
+/**
+ * Main Class
+ *
+ * @package default
+ * @author Fahad Sheikh
+ **/
+
 if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
+
+if ( is_admin() ) {
+	require_once 'admin/class-amsettings.php';
+}
+
 
 /**
 Plugin Name: Awesome Motives
@@ -10,7 +22,6 @@ Description: An Awesome Plugin!
 Author: Fahad Sheikh
 Version: 0.1
  **/
-
 class Am {
 
 	/**
@@ -22,11 +33,13 @@ class Am {
 	public function __construct() {
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_files' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_files' ) );
 
 		add_action( 'wp_ajax_return_response', array( $this, 'return_response' ) );
 		add_action( 'wp_ajax_nopriv_return_response', array( $this, 'return_response' ) );
 
 		add_shortcode( 'show_table', array( $this, 'register_show_table' ) );
+
 	}
 
 	/**
@@ -182,6 +195,7 @@ class Am {
 			WP_CLI::success( 'Cached data will be refreshed next time you access the website' );
 		}
 	}
+
 }
 
 new AM();

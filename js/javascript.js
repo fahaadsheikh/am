@@ -21,6 +21,7 @@ jQuery( document ).ready(function($) {
 				    generateTableCaption( this, parsed.title );
 				    generateTableHead( this, parsed.data.headers);
 				    generateTable( this, Object.values(parsed.data.rows) );
+				    console.log(parsed.last_fetched);
 				});
 			} else {
 				$('.jspopulate').each(function(i, obj) {

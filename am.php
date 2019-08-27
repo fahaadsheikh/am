@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	die();
+}
+
 /**
 Plugin Name: Awesome Motives
 Plugin URI: https://github.com/fahaadsheikh/am.git
@@ -6,6 +10,7 @@ Description: An Awesome Plugin!
 Author: Fahad Sheikh
 Version: 0.1
  **/
+
 class Am {
 
 	/**
@@ -22,6 +27,17 @@ class Am {
 		add_action( 'wp_ajax_nopriv_return_response', array( $this, 'return_response' ) );
 
 		add_shortcode( 'show_table', array( $this, 'register_show_table' ) );
+		add_action( 'init', array($this, 'cached_results') );
+	}
+
+	/**
+	 * Include WPCLI Command
+	 *
+	 * @return void
+	 * @author Fahad Sheikh
+	 **/
+	public function __invoke() {
+		$this->clear_am_cache_cli( $args, $assoc_args );
 	}
 
 	/**
@@ -57,8 +73,16 @@ class Am {
 
 		if ( false === $response ) {
 			$response = $this->api_call();
+
+			$response = json_decode( $response, true );
+
+			$response['last_fetched'] = date( 'Y-m-d H:i:s' );
+
+			$response = json_encode( $response );
+
 			set_transient( 'api_ress', $response, DAY_IN_SECONDS );
 		}
+
 		return $response;
 	}
 
@@ -74,7 +98,7 @@ class Am {
 		if ( ! isset( $response ) ) :
 			wp_send_json_error( array( 'error' => __( 'Data could not be fetched.' ) ) );
 		else :
-				wp_send_json_success( $response );
+			wp_send_json_success( $response );
 		endif;
 	}
 
@@ -127,6 +151,7 @@ class Am {
 	/**
 	 * Register shortcode to show API Results
 	 *
+	 * @param string $shortcode_attributes [<Attributes to be passed to the shortcode>].
 	 * @return $output
 	 * @author Fahad Sheikh
 	 **/
@@ -139,6 +164,30 @@ class Am {
 		<?php
 		return ob_get_clean();
 	}
+
+	/**
+	 * Function to clear transient via WPCLI
+	 *
+	 * @param string $args [<Attributes to be passed to the shortcode>].
+	 * @param string $assoc_args [<Attributes to be passed to the shortcode>].
+	 * @return void
+	 * @author fahad Sheikh
+	 **/
+	public function clear_am_cache_cli( $args, $assoc_args ) {
+		$response = get_transient( 'api_ress' );
+
+		if ( false === $response ) {
+			WP_CLI::error( 'Cached data does not exist' );
+		} else {
+			delete_transient( 'api_ress' );
+			WP_CLI::success( 'Cached data will be refreshed next time you access the website' );
+		}
+	}
 }
 
 new AM();
+
+
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	WP_CLI::add_command( 'am_clearcache', 'AM' );
+}

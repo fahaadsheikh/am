@@ -129,15 +129,15 @@ class AMSettings {
 	public function show_am_cache_noticies() {
 
 		if ( isset( $_GET['cleared'] ) && 1 == $_GET['cleared'] ) {
-			?>
-			<div class="notice notice-success is-dismissible">
-				<p><?php esc_attr( 'The cache was successfuly cleared!', 'am' ); ?></p>
+		?>
+			<div class="notice notice-success is-dismissible ss">
+				<p><?php esc_html_e( 'The cache was successfuly cleared!', 'am' ); ?></p>
 			</div>
 		<?php
-		} else {
+		} elseif ( isset( $_GET['cleared'] ) && 0 == $_GET['cleared'] ) {
 		?>
-			<div class="notice notice-error is-dismissible">
-				<p><?php esc_attr( 'There was a problem please try again!', 'am' ); ?></p>
+			<div class="notice notice-error is-dismissible aa">
+				<p><?php esc_html_e( 'There was a problem please try again!', 'am' ); ?></p>
 			</div>
 		<?php
 		}
